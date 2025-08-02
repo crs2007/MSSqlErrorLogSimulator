@@ -1,0 +1,14 @@
+{timestamp} spid{spid}        Database backed up. Database: {database_name}, creation date(time): {build_info}, pages dumped: {page_id}, first LSN: {database_id}:{line_number}:{cost}, last LSN: {database_id}:{line_number}:{cost}, number of dump devices: 1, device information: (FILE=1, TYPE=DISK: {{'E:\Backups\{database_name}_{hex_id}.bak'}}).
+{timestamp} spid{spid}        BACKUP DATABASE successfully processed {page_id} pages in {timeout_duration}.{severity} seconds ({cost}.{line_number} MB/sec).
+{timestamp} spid{spid}        BACKUP LOG successfully processed {page_id} pages in {timeout_duration}.{severity} seconds ({cost}.{line_number} MB/sec).
+{timestamp} spid{spid}        Database differential backup. Database: {database_name}, creation date(time): {build_info}, first LSN: {database_id}:{line_number}:{cost}, last LSN: {database_id}:{line_number}:{cost}, number of dump devices: 1, device information: (FILE=1, TYPE=DISK: {{'E:\Backups\{database_name}_diff_{hex_id}.bak'}}).
+{timestamp} spid{spid}        Log backed up. Database: {database_name}, creation date(time): {build_info}, first LSN: {database_id}:{line_number}:{cost}, last LSN: {database_id}:{line_number}:{cost}, number of dump devices: 1, device information: (FILE=1, TYPE=DISK: {{'E:\Backups\{database_name}_log_{hex_id}.trn'}}).
+{timestamp} spid{spid}        RESTORE DATABASE successfully processed {page_id} pages in {timeout_duration}.{severity} seconds ({cost}.{line_number} MB/sec).
+{timestamp} spid{spid}        RESTORE LOG successfully processed {page_id} pages in {timeout_duration}.{severity} seconds ({cost}.{line_number} MB/sec).
+{timestamp} spid{spid}        Database was restored: Database: {database_name}, creation date(time): {build_info}, first LSN: {database_id}:{line_number}:{cost}, last LSN: {database_id}:{line_number}:{cost}, number of dump devices: 1, device information: (FILE=1, TYPE=DISK: {{'E:\Backups\{database_name}_{hex_id}.bak'}}).
+{timestamp} spid{spid}        The tail of the log for database '{database_name}' has not been backed up. Use BACKUP LOG WITH NORECOVERY to backup the log if it contains work you do not want to lose.
+{timestamp} spid{spid}        Nonqualified transactions are being rolled back. Estimated rollback completion: {severity}%. Estimated time remaining: {timeout_duration} seconds.
+{timestamp} spid{spid}        Setting database option RECOVERY to {ag_state} for database '{database_name}'.
+{timestamp} spid{spid}        I/O is frozen on database '{database_name}'. No user action is required. However, if I/O is not resumed promptly, you could cancel the backup.
+{timestamp} spid{spid}        I/O was resumed on database '{database_name}'. No user action is required.
+{timestamp} spid{spid}        The backup of the file or filegroup "{table_name}" is not permitted because it is not online. BACKUP can be performed by using the FILEGROUP or FILE clauses to restrict the selection to include only online data.

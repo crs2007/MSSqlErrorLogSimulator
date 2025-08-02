@@ -1,0 +1,11 @@
+{timestamp} Logon        Service Broker login attempt failed with error: 'A previously existing connection with the same peer was detected during connection handshake. This connection lost the arbitration and it will be closed. All traffic will be redirected to the previously existing connection. This is an informational message only. No user action is required. State 80.'.  [CLIENT: {client_ip}]
+{timestamp} Logon        Service Broker login attempt failed with error: 'A previously existing connection with the same peer was detected during connection handshake. This connection lost the arbitration and it will be closed. All traffic will be redirected to the previously existing connection. This is an informational message only. No user action is required. State 80.'.  [SERVER: {client_ip}]
+{timestamp} spid{spid}s       The Service Broker endpoint is now listening for connections.
+{timestamp} spid{spid}s       The Database Mirroring endpoint is now listening for connections.
+{timestamp} spid{spid}s       Service Broker manager has started.
+{timestamp} spid{spid}s       The Service Broker endpoint is in disabled or stopped state.
+{timestamp} spid{spid}s       The Database Mirroring endpoint is in disabled or stopped state.
+{timestamp} spid{spid}s       Service Broker received an error message on this conversation. Service Broker will not transmit the message; it will be held until the application acknowledges the conversation.
+{timestamp} spid{spid}s       An error occurred while receiving data: '{error_number}'.
+{timestamp} spid{spid}s       Service Broker conversation endpoint '{service_name}' is in state 'DI' (Disconnected Inbound). No new messages can be sent on this conversation.
+{timestamp} spid{spid}s       The activated proc '[{database_name}].[{service_name}]' running on queue '{database_name}.{service_name}.qAsyncActions' output the following: 'Warning: The join order has been enforced because a local join hint is used.'

@@ -1,0 +1,2 @@
+{timestamp} Logon        Error: 18456, Severity: 14, State: {state}.
+{timestamp} Logon        Login failed for user '{username}'. Reason: {failure_reason} [CLIENT: {client_ip}]

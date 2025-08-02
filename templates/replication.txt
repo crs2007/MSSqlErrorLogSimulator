@@ -1,0 +1,10 @@
+{timestamp} spid{spid}        Error: {error_number}, Severity: {severity}, State: {state}.
+{timestamp} spid{spid}        Replication-Replication Snapshot Subsystem: agent {database_name}_Replication-{publication_name} failed. The replication agent had encountered an exception.
+{timestamp} spid{spid}        Source: Replication
+{timestamp} spid{spid}        Exception Type: Microsoft.SqlServer.Replication.ReplicationAgentException
+{timestamp} spid{spid}        Exception Message: No new articles found in publication '{publication_name}'.
+{timestamp} spid{spid}        Message Code: {error_number}
+{timestamp} spid{spid}        The replication agent has not logged a progress message in {timeout_duration} minutes. This might indicate an unresponsive agent or high system activity.
+{timestamp} spid{spid}        Replication Monitor refreshed.
+{timestamp} spid{spid}        The subscription(s) have been marked inactive and must be reinitialized. NoSync subscriptions will be dropped.
+{timestamp} spid{spid}        Publication: '{publication_name}' Database: '{database_name}' Subscriber: '{subscriber_name}'

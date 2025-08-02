@@ -1,0 +1,9 @@
+{timestamp} Server      Microsoft SQL Server {version} - {build_info}
+{timestamp} Server      UTC adjustment: {timezone}
+{timestamp} Server      (c) Microsoft Corporation.
+{timestamp} Server      All rights reserved.
+{timestamp} Server      Server process ID is {process_id}.
+{timestamp} Server      Authentication mode is {auth_mode}.
+{timestamp} Server      Logging SQL Server messages in file '{log_path}'.
+{timestamp} Server      The service account is '{service_account}'. This is an informational message; no user action is required.
+{timestamp} Server      SQL Server is now ready for client connections. This is an informational message; no user action is required.

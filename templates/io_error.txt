@@ -1,0 +1,3 @@
+{timestamp} spid{spid}        Error: {error_number}, Severity: {severity}, State: {state}.
+{timestamp} spid{spid}        {io_error_message}
+{timestamp} spid{spid}        Possible failure reasons: Problems with the hardware, the device driver, or network-related issues.

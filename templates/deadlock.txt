@@ -1,0 +1,10 @@
+{timestamp} spid{spid}s     Deadlock encountered .... Printing deadlock information
+{timestamp} spid{spid}s     Wait-for graph
+{timestamp} spid{spid}s     Node:1
+{timestamp} spid{spid}s     RID: {db_id}:1:{page_id}:0                 CleanCnt:2 Mode:X Flags: 0x3
+{timestamp} spid{spid}s      Grant List 1:
+{timestamp} spid{spid}s        Owner:0x{owner_id} Mode: X        Flg:0x40 Ref:1 Life:02000000 SPID:{victim_spid} ECID:0
+{timestamp} spid{spid}s        SPID: {victim_spid} ECID: 0 Statement Type: UPDATE Line #: {line_number}
+{timestamp} spid{spid}s        Input Buf: Language Event: {sql_statement}
+{timestamp} spid{spid}s     Victim Resource Owner:
+{timestamp} spid{spid}s      ResType:LockOwner Mode: U SPID:{victim_spid} Cost:(0/{cost})

@@ -1,0 +1,13 @@
+{timestamp} spid{spid}        SQL Trace ID {victim_spid} was started by login "{username}".
+{timestamp} spid{spid}        SQL Trace stopped. Trace ID = '{victim_spid}'. Login Name = '{username}'.
+{timestamp} spid{spid}        DBCC TRACEON {error_number}, server process ID (SPID) {spid}. This is an informational message only; no user action is required.
+{timestamp} spid{spid}        DBCC TRACEOFF {error_number}, server process ID (SPID) {spid}. This is an informational message only; no user action is required.
+{timestamp} spid{spid}        XE session '{service_name}' started.
+{timestamp} spid{spid}        XE session '{service_name}' stopping.
+{timestamp} spid{spid}        [INFO] Created Extended Events session '{service_name}'
+{timestamp} spid{spid}s       [ERROR] Log file \\{client_ip}\XEParser\{username}\Waits\XE_WAITS_{username}_0_{hex_id}.xel cannot be deleted. Last error code from CreateFile is 32
+{timestamp} spid{spid}s       [ERROR] Log file \\{client_ip}\XEParser\{username}\{service_name}\XE_{service_name}_{username}_0_{hex_id}.xel cannot be deleted. Last error code from CreateFile is 2
+{timestamp} spid{spid}        Process ID {victim_spid} was killed by hostname {username}, host process ID {process_id}.
+{timestamp} spid{spid}        Configuration option '{service_name}' changed from 0 to 1. Run the RECONFIGURE statement to install.
+{timestamp} spid{spid}        Attempting to load library '{service_name}.dll' into memory. This is an informational message only. No user action is required.
+{timestamp} spid{spid}        Using '{service_name}.dll' version '{version}' to execute extended stored procedure '{service_name}'. This is an informational message only; no user action is required.

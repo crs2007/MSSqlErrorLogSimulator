@@ -1,0 +1,77 @@
+{
+  "simulation": {
+    "server_count": 3,
+    "log_interval_seconds": 5,
+    "log_interval_variation": 2,
+    "max_runtime_minutes": 0,
+    "timezone_offset": "+03:00"
+  },
+  "error_types": {
+    "startup": {
+      "weight": 5,
+      "enabled": true
+    },
+    "deadlock": {
+      "weight": 15,
+      "enabled": true
+    },
+    "login_failed": {
+      "weight": 25,
+      "enabled": true
+    },
+    "timeout": {
+      "weight": 20,
+      "enabled": true
+    },
+    "io_error": {
+      "weight": 10,
+      "enabled": true
+    },
+    "replication": {
+      "weight": 8,
+      "enabled": true
+    },
+    "availability_group": {
+      "weight": 7,
+      "enabled": true
+    },
+    "service_broker": {
+      "weight": 5,
+      "enabled": true
+    },
+    "trace_events": {
+      "weight": 3,
+      "enabled": true
+    },
+    "backup": {
+      "weight": 6,
+      "enabled": true
+    },
+    "maintenance": {
+      "weight": 2,
+      "enabled": true
+    }
+},
+  "output": {
+    "encoding": "utf-16le",
+    "log_rotation": {
+      "enabled": false,
+      "max_size_mb": 10,
+      "max_files": 5
+    }
+  },
+  "randomization": {
+    "spid_range": [50, 3000],
+    "severity_levels": [10, 11, 14, 16, 17, 18, 20],
+    "state_range": [1, 127],
+    "error_numbers": {
+      "login_failed": [18456],
+      "deadlock": [1205],
+      "timeout": [2, 258, 1222],
+      "io_error": [823, 824, 825],
+      "replication": [14151, 20032, 21075],
+      "availability_group": [35201, 35202, 35206],
+      "backup": [3201, 3202, 3203, 3204, 3205]
+    }
+  }
+}

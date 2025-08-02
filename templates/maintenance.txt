@@ -1,0 +1,15 @@
+{timestamp} spid{spid}        CHECKDB for database '{database_name}' finished without errors on {timestamp} (local time). This is an informational message only; no user action is required.
+{timestamp} spid{spid}        Parallel redo is started for database '{database_name}' with worker pool size [{worker_pool_size}].
+{timestamp} spid{spid}        Parallel redo is shutdown for database '{database_name}' with worker pool size [{worker_pool_size}].
+{timestamp} spid{spid}        Recovery of database '{database_name}' ({database_id}) is {severity}% complete (approximately {timeout_duration} seconds remain). Phase 2 of 3. This is an informational message only. No user action is required.
+{timestamp} spid{spid}        {cost} transactions rolled back in database '{database_name}' ({database_id}:0). This is an informational message only. No user action is required.
+{timestamp} spid{spid}        Recovery is writing a checkpoint in database '{database_name}' ({database_id}). This is an informational message only. No user action is required.
+{timestamp} spid{spid}        Recovery completed for database {database_name} (database ID {database_id}) in {severity} second(s) (analysis {line_number} ms, redo {page_id} ms, undo {state} ms [system undo 0 ms, regular undo 0 ms].) ADR-enabled=0, Is primary=1, OL-Enabled=0. This is an informational message only. No user action is required.
+{timestamp} spid{spid}        Clearing tempdb database.
+{timestamp} spid{spid}        The tempdb database has {worker_pool_size} data file(s).
+{timestamp} spid{spid}        Starting up database '{database_name}'.
+{timestamp} spid{spid}        Synchronize Database '{database_name}' ({database_id}) with Resource Database.
+{timestamp} spid{spid}        RemoveStaleDbEntries: Cleanup of stale DB entries called for database ID: [{database_id}]
+{timestamp} spid{spid}        RemoveStaleDbEntries: Cleanup of stale DB entries skipped because master db is not memory optimized. DbId: {database_id}.
+{timestamp} spid{spid}        Setting database option {service_name} to {ag_state} for database '{database_name}'.
+{timestamp} spid{spid}        Autogrow of file '{table_name}' in database '{database_name}' was cancelled by user or timed out after {timeout_duration} milliseconds. Use ALTER DATABASE to set a smaller FILEGROWTH value for this file or to explicitly set a new file size.
