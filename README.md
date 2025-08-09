@@ -7,6 +7,8 @@ This project simulates Microsoft SQL Server error log files to aid in testing an
 - **Multi-server simulation**: Generate logs for multiple SQL Server instances
 - **Realistic log formats**: Matches actual SQL Server ERRORLOG structure and content
 - **Configurable intervals**: Adjustable timing between log entries
+- **Per-server rates**: Different log rates per server via `simulation.per_server`
+- **Random burst spikes**: Short, high-volume periods with biased error types
 - **Diverse error types**: Various SQL Server scenarios including startup, deadlocks, login failures, etc.
 - **Proper encoding**: UTF-16 LE encoding to match real SQL Server logs
 - **Random generation**: Realistic randomization of timestamps, SPIDs, and error scenarios
@@ -51,7 +53,12 @@ This project simulates Microsoft SQL Server error log files to aid in testing an
     "log_interval_seconds": 5,
     "log_interval_variation": 2,
     "max_runtime_minutes": 0,
-    "timezone_offset": "+03:00"
+    "timezone_offset": "+03:00",
+    "per_server": {
+      "1": { "log_interval_seconds": 5, "log_interval_variation": 2 },
+      "2": { "log_interval_seconds": 3, "log_interval_variation": 1 },
+      "3": { "log_interval_seconds": 7, "log_interval_variation": 2 }
+    }
   },
   "error_types": {
     "startup": {
@@ -98,9 +105,20 @@ This project simulates Microsoft SQL Server error log files to aid in testing an
   "output": {
     "encoding": "utf-16le",
     "log_rotation": {
-      "enabled": false,
+      "enabled": true,
       "max_size_mb": 10,
       "max_files": 5
+    }
+  },
+  "bursts": {
+    "enabled": false,
+    "chance_per_entry": 0.02,
+    "duration_seconds_range": [10, 30],
+    "interval_multiplier": 0.25,
+    "error_type_weights_override": {
+      "login_failed": 40,
+      "deadlock": 25,
+      "timeout": 25
     }
   },
   "randomization": {
@@ -123,9 +141,16 @@ This project simulates Microsoft SQL Server error log files to aid in testing an
 - **server_count**: Number of simulated servers (creates Server1, Server2, etc.)
 - **log_interval_seconds**: Base time between log entries for each server
 - **log_interval_variation**: Random variation added/subtracted from interval
+- **per_server**: Optional per-server overrides for `log_interval_seconds` and `log_interval_variation` keyed by server number as string
 - **error_types**: Weighted probability for different error types
 - **encoding**: Output file encoding (use `utf-16le` to mimic real SQL Server logs)
 - **timezone_offset**: Timezone offset for timestamps
+- **bursts**: Optional random burst spikes configuration
+  - `enabled`: Turn bursts on/off
+  - `chance_per_entry`: Probability to start a burst when generating an entry
+  - `duration_seconds_range`: Min/max seconds a burst lasts
+  - `interval_multiplier`: Multiply sleep time during burst (e.g., 0.25 makes it 4x faster)
+  - `error_type_weights_override`: Override weights while in burst to bias specific errors
 
 ---
 

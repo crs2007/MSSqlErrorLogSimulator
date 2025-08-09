@@ -60,11 +60,33 @@ class SQLServerLogSimulator:
         log_file = server_dir / "ERRORLOG"
         
         self.logger.info(f"Starting simulation for Server{server_num}")
-        
+
+        bursts_config = self.config.get('bursts', {})
+        burst_enabled = bursts_config.get('enabled', False)
+        burst_chance = bursts_config.get('chance_per_entry', 0.0)
+        burst_duration_range = tuple(bursts_config.get('duration_seconds_range', [10, 30]))
+        burst_interval_multiplier = bursts_config.get('interval_multiplier', 0.25)
+        burst_weight_override = bursts_config.get('error_type_weights_override', {})
+
+        in_burst = False
+        burst_ends_at = None
+
         while self.running:
             try:
+                now = datetime.now()
+
+                if in_burst and now >= burst_ends_at:
+                    in_burst = False
+                    burst_ends_at = None
+
+                if (not in_burst) and burst_enabled and random.random() < burst_chance:
+                    duration = random.uniform(burst_duration_range[0], burst_duration_range[1])
+                    burst_ends_at = now + timedelta(seconds=duration)
+                    in_burst = True
+
                 # Generate log entry
-                error_type = select_weighted_error_type(self.config['error_types'])
+                error_types_config = self._compose_error_weights(burst_weight_override) if in_burst else self.config['error_types']
+                error_type = select_weighted_error_type(error_types_config)
                 log_entry = generate_error_entry(
                     error_type, 
                     self.templates, 
@@ -77,9 +99,10 @@ class SQLServerLogSimulator:
                 self._write_log_entry(log_file, log_entry)
                 
                 # Wait for next entry
-                base_interval = self.config['simulation']['log_interval_seconds']
-                variation = self.config['simulation'].get('log_interval_variation', 0)
+                base_interval, variation = self._server_interval(server_num)
                 sleep_time = base_interval + random.uniform(-variation, variation)
+                if in_burst:
+                    sleep_time *= max(0.01, burst_interval_multiplier)
                 sleep_time = max(0.1, sleep_time)  # Minimum 0.1 seconds
                 
                 time.sleep(sleep_time)
@@ -129,6 +152,35 @@ class SQLServerLogSimulator:
             thread.join(timeout=5)
         
         self.logger.info("Simulation stopped")
+
+    def _server_interval(self, server_num):
+        sim = self.config.get('simulation', {})
+        per_server = sim.get('per_server', {})
+        key = str(server_num)
+        base = sim.get('log_interval_seconds', 5)
+        var = sim.get('log_interval_variation', 0)
+        if key in per_server:
+            o = per_server[key]
+            base = o.get('log_interval_seconds', base)
+            var = o.get('log_interval_variation', var)
+        return base, var
+
+    def _compose_error_weights(self, overrides):
+        if not overrides:
+            return self.config['error_types']
+        merged = {}
+        for name, cfg in self.config['error_types'].items():
+            if name in overrides:
+                merged[name] = {
+                    'weight': overrides[name],
+                    'enabled': cfg.get('enabled', True)
+                }
+            else:
+                merged[name] = cfg
+        for name, weight in overrides.items():
+            if name not in merged:
+                merged[name] = { 'weight': weight, 'enabled': True }
+        return merged
 
 def main():
     simulator = SQLServerLogSimulator()
