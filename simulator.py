@@ -4,6 +4,7 @@ MS SQL Server Error Log Simulator
 Generates realistic SQL Server ERRORLOG files for testing purposes
 """
 
+import argparse
 import json
 import os
 import random
@@ -32,7 +33,7 @@ class SQLServerLogSimulator:
         setup_logging()
         self.logger = logging.getLogger(__name__)
         
-    def start_simulation(self):
+    def start_simulation(self, runtime_minutes=None):
         """Start the simulation for all servers"""
         self.running = True
         create_server_directories(self.config['simulation']['server_count'])
@@ -49,9 +50,10 @@ class SQLServerLogSimulator:
             thread.start()
             self.threads.append(thread)
         
-        # Handle max runtime
-        max_runtime = self.config['simulation'].get('max_runtime_minutes', 0)
+        # Handle max runtime - use command line argument if provided, otherwise use config
+        max_runtime = runtime_minutes if runtime_minutes is not None else self.config['simulation'].get('max_runtime_minutes', 0)
         if max_runtime > 0:
+            self.logger.info(f"Simulation will run for {max_runtime} minutes")
             threading.Timer(max_runtime * 60, self.stop_simulation).start()
     
     def _simulate_server(self, server_num):
@@ -193,10 +195,14 @@ class SQLServerLogSimulator:
         return merged
 
 def main():
+    parser = argparse.ArgumentParser(description='MS SQL Server Error Log Simulator')
+    parser.add_argument('--runtime', type=int, help='Runtime in minutes (overrides config setting)')
+    args = parser.parse_args()
+    
     simulator = SQLServerLogSimulator()
     
     try:
-        simulator.start_simulation()
+        simulator.start_simulation(runtime_minutes=args.runtime)
         print("SQL Server Log Simulator started. Press Ctrl+C to stop...")
         
         while simulator.running:
