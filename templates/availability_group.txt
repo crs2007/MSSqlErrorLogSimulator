@@ -7,3 +7,4 @@
 {timestamp} spid{spid}s       Always On: DebugTraceVarArgs AR '[HADR] [Primary] operation on replicas [{replica_id}]->[{replica_id}], database [{database_name}], remote endpoint [TCP://{subscriber_name}.local:5023], source operation [{hex_id}]: Transitioning from [PENDING] to [CATCHUP].'
 {timestamp} spid{spid}s       Always On: DebugTraceVarArgs AR '[HADR] [Primary] operation on replicas [{replica_id}]->[{replica_id}], database [{database_name}], remote endpoint [TCP://{subscriber_name}.local:5023], source operation [{hex_id}]: Transitioning from [CATCHUP] to [COMPLETED].'
 {timestamp} spid{spid}s       A connection for availability group '{ag_name}' from availability replica '{username}' with id [{replica_id}] to '{subscriber_name}' with id [{replica_id}] has been successfully established. This is an informational message only. No user action is required.
+{timestamp} spid{spid}s       Availability group '{ag_name}' is now online and ready for client connections.

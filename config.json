@@ -55,6 +55,46 @@
     "maintenance": {
       "weight": 2,
       "enabled": true
+    },
+    "memory_pressure": {
+      "weight": 8,
+      "enabled": true
+    },
+    "tempdb_issues": {
+      "weight": 6,
+      "enabled": true
+    },
+    "blocking": {
+      "weight": 12,
+      "enabled": true
+    },
+    "performance_warnings": {
+      "weight": 10,
+      "enabled": true
+    },
+    "connection_pool": {
+      "weight": 7,
+      "enabled": true
+    },
+    "corruption": {
+      "weight": 3,
+      "enabled": true
+    },
+    "index_maintenance": {
+      "weight": 5,
+      "enabled": true
+    },
+    "statistics": {
+      "weight": 4,
+      "enabled": true
+    },
+    "job_failures": {
+      "weight": 6,
+      "enabled": true
+    },
+    "linked_server": {
+      "weight": 4,
+      "enabled": true
     }
 },
   "output": {
@@ -87,7 +127,17 @@
       "io_error": [823, 824, 825],
       "replication": [14151, 20032, 21075],
       "availability_group": [35201, 35202, 35206],
-      "backup": [3201, 3202, 3203, 3204, 3205]
+      "backup": [3201, 3202, 3203, 3204, 3205],
+      "memory_pressure": [701, 702, 703],
+      "tempdb_issues": [1105, 1106, 1107],
+      "blocking": [1222, 1223, 1224],
+      "performance_warnings": [8651, 8652, 8653],
+      "connection_pool": [18456, 18470, 18471],
+      "corruption": [824, 825, 826],
+      "index_maintenance": [8651, 8652, 8653],
+      "statistics": [8651, 8652, 8653],
+      "job_failures": [18456, 18470, 18471],
+      "linked_server": [18456, 18470, 18471]
     }
   }
 }

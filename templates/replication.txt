@@ -8,3 +8,4 @@
 {timestamp} spid{spid}        Replication Monitor refreshed.
 {timestamp} spid{spid}        The subscription(s) have been marked inactive and must be reinitialized. NoSync subscriptions will be dropped.
 {timestamp} spid{spid}        Publication: '{publication_name}' Database: '{database_name}' Subscriber: '{subscriber_name}'
+{timestamp} spid{spid}        Replication agent will retry the operation in {timeout_duration} minutes.

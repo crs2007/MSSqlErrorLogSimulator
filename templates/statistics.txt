@@ -1,0 +1,7 @@
+{timestamp} spid{spid}        Warning: Statistics issue detected.
+{timestamp} spid{spid}        {stats_message}
+{timestamp} spid{spid}        Statistics age: {stats_age_days} days.
+{timestamp} spid{spid}        Table row count: {table_row_count}.
+{timestamp} spid{spid}        Database: '{database_name}'.
+{timestamp} spid{spid}        Table: '{table_name}'.
+{timestamp} spid{spid}        Consider updating statistics to improve query performance.

@@ -1,0 +1,6 @@
+{timestamp} spid{spid}        Warning: Performance issue detected.
+{timestamp} spid{spid}        {performance_message}
+{timestamp} spid{spid}        CPU usage: {cpu_percentage}%.
+{timestamp} spid{spid}        I/O wait: {io_wait_percentage}%.
+{timestamp} spid{spid}        Database: '{database_name}'.
+{timestamp} spid{spid}        Consider optimizing queries or adding more resources.

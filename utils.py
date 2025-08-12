@@ -194,11 +194,12 @@ def generate_error_entry(error_type, templates, sample_data, config, server_num)
     
     template = templates[error_type]
     timestamp = generate_timestamp(config.get('simulation', {}).get('timezone_offset', '+03:00'))
+    spid = generate_spid()
     
-    # Common variables for all templates
+    # Common variables for all templates - ensure same SPID and timestamp for paired logs
     variables = {
         'timestamp': timestamp,
-        'spid': generate_spid(),
+        'spid': spid,
         'server_num': server_num,
         'error_number': generate_error_number(error_type, config),
         'severity': generate_severity(),
@@ -228,7 +229,8 @@ def generate_error_entry(error_type, templates, sample_data, config, server_num)
             "2022 (RTM-CU13-GDR) (KB5040939) - 16.0.4131.2 (X64)",
             "2019 (RTM-CU15) (KB5008996) - 15.0.4198.2 (X64)",
             "2017 (RTM-CU31) (KB5016884) - 14.0.3456.2 (X64)"
-        ])
+        ]),
+        'service_name': random.choice(['OrderService', 'NotificationService', 'ProcessingService', 'BackupService'])
     }
     
     # Type-specific variables
@@ -248,6 +250,30 @@ def generate_error_entry(error_type, templates, sample_data, config, server_num)
         variables.update(generate_service_broker_variables(sample_data))
     elif error_type == 'timeout':
         variables.update(generate_timeout_variables(sample_data))
+    elif error_type == 'backup':
+        variables.update(generate_backup_variables(sample_data))
+    elif error_type == 'memory_pressure':
+        variables.update(generate_memory_pressure_variables(sample_data))
+    elif error_type == 'tempdb_issues':
+        variables.update(generate_tempdb_variables(sample_data))
+    elif error_type == 'blocking':
+        variables.update(generate_blocking_variables(sample_data))
+    elif error_type == 'performance_warnings':
+        variables.update(generate_performance_variables(sample_data))
+    elif error_type == 'connection_pool':
+        variables.update(generate_connection_pool_variables(sample_data))
+    elif error_type == 'corruption':
+        variables.update(generate_corruption_variables(sample_data))
+    elif error_type == 'index_maintenance':
+        variables.update(generate_index_maintenance_variables(sample_data))
+    elif error_type == 'statistics':
+        variables.update(generate_statistics_variables(sample_data))
+    elif error_type == 'job_failures':
+        variables.update(generate_job_failure_variables(sample_data))
+    elif error_type == 'linked_server':
+        variables.update(generate_linked_server_variables(sample_data))
+    elif error_type == 'maintenance':
+        variables.update(generate_maintenance_variables(sample_data))
     
     # Replace variables in template
     try:
@@ -256,6 +282,8 @@ def generate_error_entry(error_type, templates, sample_data, config, server_num)
         logging.warning(f"Missing variable {e} in template {error_type}")
         # Return template with unreplaced variables for debugging
         return template
+
+
 
 def generate_startup_variables(sample_data, server_num):
     """Generate variables specific to startup messages"""
@@ -340,7 +368,8 @@ def generate_ag_variables(sample_data):
     return {
         'ag_name': random.choice(ag_names),
         'ag_state': random.choice(ag_states),
-        'replica_id': generate_hex_id(36).lower()
+        'replica_id': generate_hex_id(36).lower(),
+        'subscriber_name': random.choice(sample_data.get('server_names', ['Subscriber1']))
     }
 
 def generate_service_broker_variables(sample_data):
@@ -362,6 +391,181 @@ def generate_timeout_variables(sample_data):
     return {
         'timeout_message': random.choice(timeout_types),
         'timeout_duration': random.randint(30, 600)
+    }
+
+def generate_backup_variables(sample_data):
+    """Generate variables for backup/restore messages"""
+    recovery_models = ['SIMPLE', 'FULL', 'BULK_LOGGED']
+    return {
+        'ag_state': random.choice(recovery_models)
+    }
+
+def generate_memory_pressure_variables(sample_data):
+    """Generate variables for memory pressure messages"""
+    memory_messages = [
+        "A significant part of sql server process memory has been paged out. This may result in a performance degradation.",
+        "Memory pressure detected. SQL Server is experiencing memory pressure and may need to release memory.",
+        "Buffer pool memory pressure detected. SQL Server is experiencing buffer pool memory pressure.",
+        "Memory manager is experiencing memory pressure. This may result in performance degradation."
+    ]
+    
+    return {
+        'memory_message': random.choice(memory_messages),
+        'memory_percentage': random.randint(80, 95),
+        'buffer_pool_size': random.randint(1024, 8192)
+    }
+
+def generate_tempdb_variables(sample_data):
+    """Generate variables for tempdb issues"""
+    tempdb_issues = [
+        "Tempdb space usage is high. Consider adding more tempdb files or increasing file size.",
+        "Tempdb contention detected. Multiple sessions are waiting for tempdb resources.",
+        "Tempdb file growth is occurring frequently. Consider pre-sizing tempdb files.",
+        "Tempdb log file is growing rapidly. Check for long-running transactions."
+    ]
+    
+    return {
+        'tempdb_message': random.choice(tempdb_issues),
+        'tempdb_usage_percent': random.randint(70, 95),
+        'tempdb_file_count': random.randint(1, 8)
+    }
+
+def generate_blocking_variables(sample_data):
+    """Generate variables for blocking issues"""
+    blocking_scenarios = [
+        "Session {spid} is blocked by session {victim_spid} on resource {table_name}",
+        "Long-running transaction detected. Session {spid} has been running for {timeout_duration} seconds",
+        "Blocking chain detected. Multiple sessions are waiting for resources",
+        "Deadlock victim process {victim_spid} was chosen"
+    ]
+    
+    return {
+        'blocking_message': random.choice(blocking_scenarios),
+        'blocking_duration': random.randint(30, 300),
+        'blocked_session_count': random.randint(1, 10)
+    }
+
+def generate_performance_variables(sample_data):
+    """Generate variables for performance warnings"""
+    performance_issues = [
+        "Query execution time exceeded threshold. Consider optimizing the query.",
+        "High CPU usage detected. SQL Server is experiencing high CPU utilization.",
+        "Disk I/O bottleneck detected. Consider adding more disk spindles or using SSDs.",
+        "Network latency is high. Check network connectivity and bandwidth."
+    ]
+    
+    return {
+        'performance_message': random.choice(performance_issues),
+        'cpu_percentage': random.randint(70, 95),
+        'io_wait_percentage': random.randint(10, 50)
+    }
+
+def generate_connection_pool_variables(sample_data):
+    """Generate variables for connection pool issues"""
+    pool_issues = [
+        "Connection pool is exhausted. No available connections in the pool.",
+        "Connection timeout occurred. Client could not establish connection within timeout period.",
+        "Maximum number of connections reached. Cannot accept new connections.",
+        "Connection pool pressure detected. High number of connection requests."
+    ]
+    
+    return {
+        'pool_message': random.choice(pool_issues),
+        'max_connections': random.randint(100, 1000),
+        'current_connections': random.randint(80, 95)
+    }
+
+def generate_corruption_variables(sample_data):
+    """Generate variables for corruption issues"""
+    corruption_types = [
+        "Page corruption detected in database '{database_name}'",
+        "Checksum failure detected on page {page_id} in database '{database_name}'",
+        "Torn page detected. Page {page_id} in database '{database_name}' is corrupted",
+        "Database '{database_name}' is marked as suspect due to corruption"
+    ]
+    
+    return {
+        'corruption_message': random.choice(corruption_types),
+        'corrupted_page_count': random.randint(1, 10),
+        'recovery_model': random.choice(['FULL', 'SIMPLE', 'BULK_LOGGED'])
+    }
+
+def generate_index_maintenance_variables(sample_data):
+    """Generate variables for index maintenance issues"""
+    index_issues = [
+        "Index rebuild operation failed on index '{table_name}_IX' in database '{database_name}'",
+        "Index fragmentation is high on index '{table_name}_IX'. Consider rebuilding the index.",
+        "Index maintenance job failed. Error occurred during index reorganization.",
+        "Statistics are out of date on table '{table_name}'. Consider updating statistics."
+    ]
+    
+    return {
+        'index_message': random.choice(index_issues),
+        'fragmentation_percent': random.randint(20, 80),
+        'index_size_mb': random.randint(10, 1000)
+    }
+
+def generate_statistics_variables(sample_data):
+    """Generate variables for statistics issues"""
+    stats_issues = [
+        "Statistics are stale on table '{table_name}'. Last updated: {build_info}",
+        "Auto-update statistics is disabled on table '{table_name}'",
+        "Statistics update failed on table '{table_name}' due to insufficient permissions",
+        "Outdated statistics detected. Query performance may be affected."
+    ]
+    
+    return {
+        'stats_message': random.choice(stats_issues),
+        'stats_age_days': random.randint(1, 365),
+        'table_row_count': random.randint(1000, 1000000)
+    }
+
+def generate_job_failure_variables(sample_data):
+    """Generate variables for job failure issues"""
+    job_names = ['DatabaseBackup', 'IndexMaintenance', 'StatisticsUpdate', 'LogCleanup', 'DataArchive']
+    failure_reasons = [
+        "Job '{service_name}' failed. Error: Login failed for user '{username}'",
+        "Job '{service_name}' failed. Error: Database '{database_name}' is not accessible",
+        "Job '{service_name}' failed. Error: Insufficient disk space",
+        "Job '{service_name}' failed. Error: Timeout expired"
+    ]
+    
+    return {
+        'job_name': random.choice(job_names),
+        'job_failure_message': random.choice(failure_reasons),
+        'job_duration_minutes': random.randint(5, 120),
+        'retry_count': random.randint(0, 3)
+    }
+
+def generate_linked_server_variables(sample_data):
+    """Generate variables for linked server issues"""
+    linked_server_names = ['RemoteServer1', 'RemoteServer2', 'LegacyServer', 'ReportingServer']
+    linked_issues = [
+        "Linked server '{service_name}' connection failed. Error: Login timeout expired",
+        "Linked server '{service_name}' is not responding. Network connectivity issue detected",
+        "Linked server '{service_name}' authentication failed. Invalid credentials provided",
+        "Linked server '{service_name}' query timeout. Remote server is not responding"
+    ]
+    
+    return {
+        'linked_server_name': random.choice(linked_server_names),
+        'linked_server_message': random.choice(linked_issues),
+        'connection_timeout': random.randint(30, 300),
+        'remote_database': random.choice(sample_data.get('database_names', ['RemoteDB']))
+    }
+
+def generate_maintenance_variables(sample_data):
+    """Generate variables for maintenance operations"""
+    service_names = ['AUTO_CLOSE', 'AUTO_SHRINK', 'AUTO_UPDATE_STATISTICS', 'READ_ONLY', 'SINGLE_USER']
+    ag_states = ['ON', 'OFF', 'READ_ONLY', 'READ_WRITE']
+    table_names = ['Users', 'Orders', 'Products', 'Inventory', 'Logs', 'Settings']
+    
+    return {
+        'worker_pool_size': random.randint(1, 16),
+        'cost': random.randint(1, 1000),
+        'service_name': random.choice(service_names),
+        'ag_state': random.choice(ag_states),
+        'table_name': random.choice(table_names)
     }
 
 def create_default_templates():

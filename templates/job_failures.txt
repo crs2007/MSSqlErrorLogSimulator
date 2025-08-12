@@ -1,0 +1,7 @@
+{timestamp} spid{spid}        Error: Job '{job_name}' failed.
+{timestamp} spid{spid}        {job_failure_message}
+{timestamp} spid{spid}        Job duration: {job_duration_minutes} minutes.
+{timestamp} spid{spid}        Retry count: {retry_count}.
+{timestamp} spid{spid}        Database: '{database_name}'.
+{timestamp} spid{spid}        User: '{username}'.
+{timestamp} spid{spid}        Check job history for detailed error information.

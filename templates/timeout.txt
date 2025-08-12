@@ -1,6 +1,9 @@
 {timestamp} spid{spid}        Error: {error_number}, Severity: {severity}, State: {state}.
 {timestamp} spid{spid}        {timeout_message}
 {timestamp} spid{spid}        The timeout period elapsed prior to completion of the operation or the server is not responding.
+{timestamp} spid{spid}        Timeout duration: {timeout_duration} seconds.
+{timestamp} spid{spid}        Database: '{database_name}'.
+{timestamp} spid{spid}        Client IP: {client_ip}.
 {timestamp} spid{spid}        Connection timeout expired. The timeout period elapsed during the post-login phase.
 {timestamp} spid{spid}        OLE DB provider "MSOLEDBSQL" for linked server "{username}" returned message "Login timeout expired".
 {timestamp} spid{spid}        Lock request time out period exceeded. Session ID: {spid}. Database: '{database_name}'.

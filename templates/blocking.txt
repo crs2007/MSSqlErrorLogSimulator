@@ -1,0 +1,6 @@
+{timestamp} spid{spid}        Warning: Blocking detected in database '{database_name}'.
+{timestamp} spid{spid}        {blocking_message}
+{timestamp} spid{spid}        Blocking duration: {blocking_duration} seconds.
+{timestamp} spid{spid}        Number of blocked sessions: {blocked_session_count}.
+{timestamp} spid{spid}        Resource: {table_name} in database '{database_name}'.
+{timestamp} spid{spid}        Consider killing blocking session or optimizing queries.

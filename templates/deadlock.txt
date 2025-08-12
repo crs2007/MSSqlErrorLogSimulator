@@ -8,3 +8,5 @@
 {timestamp} spid{spid}s        Input Buf: Language Event: {sql_statement}
 {timestamp} spid{spid}s     Victim Resource Owner:
 {timestamp} spid{spid}s      ResType:LockOwner Mode: U SPID:{victim_spid} Cost:(0/{cost})
+{timestamp} spid{spid}s     deadlock victim=process{victim_spid}
+{timestamp} spid{spid}s      ridlock fileid=1 pageid={page_id} dbid={db_id} objectname={database_name}.dbo.{table_name} mode=X

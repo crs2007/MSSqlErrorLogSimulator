@@ -1,0 +1,6 @@
+{timestamp} spid{spid}        Error: Linked server '{linked_server_name}' connection failed.
+{timestamp} spid{spid}        {linked_server_message}
+{timestamp} spid{spid}        Connection timeout: {connection_timeout} seconds.
+{timestamp} spid{spid}        Remote database: '{remote_database}'.
+{timestamp} spid{spid}        Client IP: {client_ip}.
+{timestamp} spid{spid}        Check network connectivity and linked server configuration.

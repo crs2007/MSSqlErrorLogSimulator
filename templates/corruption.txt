@@ -1,0 +1,7 @@
+{timestamp} spid{spid}        Error: 824, Severity: 24, State: {state}.
+{timestamp} spid{spid}        {corruption_message}
+{timestamp} spid{spid}        Number of corrupted pages: {corrupted_page_count}.
+{timestamp} spid{spid}        Recovery model: {recovery_model}.
+{timestamp} spid{spid}        Page ID: {page_id}.
+{timestamp} spid{spid}        Database ID: {database_id}.
+{timestamp} spid{spid}        Immediate action required: Run DBCC CHECKDB to verify corruption extent.

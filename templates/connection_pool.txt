@@ -1,0 +1,6 @@
+{timestamp} spid{spid}        Error: 18456, Severity: 14, State: {state}.
+{timestamp} spid{spid}        {pool_message}
+{timestamp} spid{spid}        Current connections: {current_connections}/{max_connections}.
+{timestamp} spid{spid}        Connection pool utilization: {current_connections}%.
+{timestamp} spid{spid}        Client IP: {client_ip}.
+{timestamp} spid{spid}        Consider increasing max connections or optimizing connection usage.

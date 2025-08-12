@@ -1,0 +1,5 @@
+{timestamp} spid{spid}        Error: 701, Severity: 17, State: {state}.
+{timestamp} spid{spid}        {memory_message}
+{timestamp} spid{spid}        Memory usage: {memory_percentage}% of available memory.
+{timestamp} spid{spid}        Buffer pool size: {buffer_pool_size} MB.
+{timestamp} spid{spid}        Consider adding more memory or reducing workload.

@@ -12,3 +12,4 @@
 {timestamp} spid{spid}        I/O is frozen on database '{database_name}'. No user action is required. However, if I/O is not resumed promptly, you could cancel the backup.
 {timestamp} spid{spid}        I/O was resumed on database '{database_name}'. No user action is required.
 {timestamp} spid{spid}        The backup of the file or filegroup "{table_name}" is not permitted because it is not online. BACKUP can be performed by using the FILEGROUP or FILE clauses to restrict the selection to include only online data.
+{timestamp} spid{spid}        Backup operation completed successfully for database '{database_name}'.

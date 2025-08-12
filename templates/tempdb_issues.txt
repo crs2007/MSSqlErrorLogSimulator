@@ -1,0 +1,5 @@
+{timestamp} spid{spid}        Warning: Tempdb space usage is high.
+{timestamp} spid{spid}        {tempdb_message}
+{timestamp} spid{spid}        Current usage: {tempdb_usage_percent}% of available space.
+{timestamp} spid{spid}        Number of tempdb files: {tempdb_file_count}.
+{timestamp} spid{spid}        Consider adding more tempdb files or increasing file size.

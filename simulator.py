@@ -119,8 +119,18 @@ class SQLServerLogSimulator:
         if self.config['output']['log_rotation']['enabled']:
             self._handle_log_rotation(log_file)
         
-        with open(log_file, 'a', encoding=encoding, newline='\r\n') as f:
-            f.write(entry + '\n')
+        # Check if entry contains multiple lines (paired logs)
+        if '\n' in entry:
+            # Split into individual lines and write each one
+            lines = entry.split('\n')
+            with open(log_file, 'a', encoding=encoding, newline='\r\n') as f:
+                for line in lines:
+                    if line.strip():  # Only write non-empty lines
+                        f.write(line + '\n')
+        else:
+            # Single line entry
+            with open(log_file, 'a', encoding=encoding, newline='\r\n') as f:
+                f.write(entry + '\n')
     
     def _handle_log_rotation(self, log_file):
         """Handle log file rotation if file size exceeds limit"""
