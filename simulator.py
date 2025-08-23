@@ -8,6 +8,8 @@ import argparse
 import json
 import os
 import random
+import signal
+import sys
 import time
 import threading
 from datetime import datetime, timedelta
@@ -28,14 +30,26 @@ class SQLServerLogSimulator:
         self.templates = load_templates()
         self.sample_data = load_sample_data()
         self.running = False
+        self.stop_event = threading.Event()
         self.threads = []
         
         setup_logging()
         self.logger = logging.getLogger(__name__)
         
+        # Set up signal handler for graceful shutdown
+        signal.signal(signal.SIGINT, self._signal_handler)
+        signal.signal(signal.SIGTERM, self._signal_handler)
+    
+    def _signal_handler(self, signum, frame):
+        """Handle shutdown signals"""
+        print(f"\nReceived signal {signum}, shutting down gracefully...")
+        self.stop_simulation()
+        sys.exit(0)
+
     def start_simulation(self, runtime_minutes=None):
         """Start the simulation for all servers"""
         self.running = True
+        self.stop_event.clear()
         create_server_directories(self.config['simulation']['server_count'])
         
         self.logger.info(f"Starting simulation for {self.config['simulation']['server_count']} servers")
@@ -73,7 +87,7 @@ class SQLServerLogSimulator:
         in_burst = False
         burst_ends_at = None
 
-        while self.running:
+        while self.running and not self.stop_event.is_set():
             try:
                 now = datetime.now()
 
@@ -100,18 +114,21 @@ class SQLServerLogSimulator:
                 # Write to log file
                 self._write_log_entry(log_file, log_entry)
                 
-                # Wait for next entry
+                # Wait for next entry with interruptible sleep
                 base_interval, variation = self._server_interval(server_num)
                 sleep_time = base_interval + random.uniform(-variation, variation)
                 if in_burst:
                     sleep_time *= max(0.01, burst_interval_multiplier)
                 sleep_time = max(0.1, sleep_time)  # Minimum 0.1 seconds
                 
-                time.sleep(sleep_time)
+                # Use interruptible sleep
+                if self.stop_event.wait(timeout=sleep_time):
+                    break
                 
             except Exception as e:
                 self.logger.error(f"Error in server {server_num} simulation: {e}")
-                time.sleep(1)
+                if self.stop_event.wait(timeout=1):
+                    break
     
     def _write_log_entry(self, log_file, entry):
         """Write log entry to file with proper encoding"""
@@ -159,9 +176,11 @@ class SQLServerLogSimulator:
         """Stop the simulation"""
         self.logger.info("Stopping simulation...")
         self.running = False
+        self.stop_event.set()
         
+        # Wait for threads with shorter timeout
         for thread in self.threads:
-            thread.join(timeout=5)
+            thread.join(timeout=1)
         
         self.logger.info("Simulation stopped")
 
@@ -201,16 +220,14 @@ def main():
     
     simulator = SQLServerLogSimulator()
     
+    simulator.start_simulation(runtime_minutes=args.runtime)
+    print("SQL Server Log Simulator started. Press Ctrl+C to stop...")
+    
     try:
-        simulator.start_simulation(runtime_minutes=args.runtime)
-        print("SQL Server Log Simulator started. Press Ctrl+C to stop...")
-        
         while simulator.running:
-            time.sleep(1)
-            
+            time.sleep(0.5)
     except KeyboardInterrupt:
-        print("\nShutting down...")
-        simulator.stop_simulation()
+        pass  # Signal handler will take care of shutdown
 
 if __name__ == "__main__":
     main()
