@@ -21,6 +21,7 @@ from utils import (
     select_weighted_error_type, generate_error_entry,
     setup_logging, create_server_directories
 )
+from kafka_handler import KafkaLogPublisher
 
 class SQLServerLogSimulator:
     def __init__(self, config_path='config.json'):
@@ -35,6 +36,8 @@ class SQLServerLogSimulator:
         
         setup_logging()
         self.logger = logging.getLogger(__name__)
+        
+        self.kafka_publisher = KafkaLogPublisher(self.config)
         
         # Set up signal handler for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -114,6 +117,9 @@ class SQLServerLogSimulator:
                 # Write to log file
                 self._write_log_entry(log_file, log_entry)
                 
+                # Publish to Kafka if enabled
+                self._publish_to_kafka(log_entry, server_num, error_type)
+                
                 # Wait for next entry with interruptible sleep
                 base_interval, variation = self._server_interval(server_num)
                 sleep_time = base_interval + random.uniform(-variation, variation)
@@ -172,6 +178,18 @@ class SQLServerLogSimulator:
                 backup_file.unlink()
             log_file.rename(backup_file)
     
+    def _publish_to_kafka(self, log_entry, server_num, error_type):
+        """Publish log entry to Kafka topic"""
+        try:
+            timestamp = datetime.now()
+            metadata = {
+                'source': 'sql_error_log_simulator',
+                'version': '1.0'
+            }
+            self.kafka_publisher.publish_log_entry(log_entry, server_num, error_type, timestamp, metadata)
+        except Exception as e:
+            self.logger.error(f"Failed to publish to Kafka: {e}")
+
     def stop_simulation(self):
         """Stop the simulation"""
         self.logger.info("Stopping simulation...")
@@ -181,6 +199,10 @@ class SQLServerLogSimulator:
         # Wait for threads with shorter timeout
         for thread in self.threads:
             thread.join(timeout=1)
+        
+        # Close Kafka producer
+        if hasattr(self, 'kafka_publisher'):
+            self.kafka_publisher.close()
         
         self.logger.info("Simulation stopped")
 

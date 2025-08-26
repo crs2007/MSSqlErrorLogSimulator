@@ -1,4 +1,5 @@
-# MS SQL Server Error Log Simulator
+# MS SQL Server Error Log Simulator - Project Instructions
+
 ## 📋 Project Overview
 This project simulates Microsoft SQL Server error log files to aid in testing and validating monitoring tools, alerting systems, and log parsers without relying on live SQL Server instances. It creates realistic log entries for multiple servers at configurable intervals, mimicking real SQL Server ERRORLOG files.
 
@@ -19,8 +20,10 @@ This project simulates Microsoft SQL Server error log files to aid in testing an
 /SqlErrorLogSimulator/
 │
 ├── config.json                     # Main configuration file
+├── config_kafka_example.json       # Example config with Kafka enabled
 ├── simulator.py                    # Main simulator script
 ├── utils.py                        # Utility functions and helpers
+├── kafka_handler.py                # Kafka publishing handler
 ├── requirements.txt                # Python dependencies
 ├── templates/                      # Error message templates
 │   ├── startup.txt                 # Server startup messages
@@ -109,6 +112,18 @@ This project simulates Microsoft SQL Server error log files to aid in testing an
       "max_files": 5
     }
   },
+  "kafka": {
+    "enabled": false,
+    "bootstrap_servers": "localhost:29092",
+    "topic": "sql-server-raw-errorlogs",
+    "producer_options": {
+      "acks": "all",
+      "retries": 3,
+      "batch_size": 16384,
+      "linger_ms": 10,
+      "buffer_memory": 33554432
+    }
+  },
   "bursts": {
     "enabled": false,
     "chance_per_entry": 0.02,
@@ -144,12 +159,112 @@ This project simulates Microsoft SQL Server error log files to aid in testing an
 - **error_types**: Weighted probability for different error types
 - **encoding**: Output file encoding (use `utf-16le` to mimic real SQL Server logs)
 - **timezone_offset**: Timezone offset for timestamps
+- **kafka**: Kafka publishing configuration (see Kafka Integration section below)
 - **bursts**: Optional random burst spikes configuration
   - `enabled`: Turn bursts on/off
   - `chance_per_entry`: Probability to start a burst when generating an entry
   - `duration_seconds_range`: Min/max seconds a burst lasts
   - `interval_multiplier`: Multiply sleep time during burst (e.g., 0.25 makes it 4x faster)
   - `error_type_weights_override`: Override weights while in burst to bias specific errors
+
+---
+
+## 🚀 Kafka Integration
+
+### Overview
+The simulator can optionally publish log entries to Kafka topics for real-time streaming and integration with data pipelines. This feature is controlled by the `kafka.enabled` configuration parameter.
+
+### Configuration
+```json
+{
+  "kafka": {
+    "enabled": false,
+    "bootstrap_servers": "localhost:29092",
+    "topic": "sql-server-raw-errorlogs",
+    "producer_options": {
+      "acks": "all",
+      "retries": 3,
+      "batch_size": 16384,
+      "linger_ms": 10,
+      "buffer_memory": 33554432
+    }
+  }
+}
+```
+
+### Kafka Configuration Parameters:
+- **enabled**: Enable/disable Kafka publishing (default: false)
+- **bootstrap_servers**: Comma-separated list of Kafka brokers (default: localhost:29092)
+- **topic**: Target Kafka topic for log entries (default: sql-server-raw-errorlogs)
+- **producer_options**: Additional Kafka producer configuration options
+
+### Message Format
+Each log entry published to Kafka includes:
+```json
+{
+  "log_entry": "2025-08-02 08:54:30.34 spid35s     Deadlock encountered...",
+  "server_num": 1,
+  "server_name": "Server1",
+  "error_type": "deadlock",
+  "timestamp": "2025-08-02T08:54:30.340000",
+  "metadata": {
+    "source": "sql_error_log_simulator",
+    "version": "1.0"
+  }
+}
+```
+
+### Setup Instructions
+1. **Install Kafka Dependencies**:
+   ```bash
+   pip install kafka-python
+   ```
+
+2. **Configure Kafka Connection**:
+   - Set `kafka.enabled: true` in config.json
+   - Update `bootstrap_servers` to point to your Kafka cluster
+   - Optionally customize the topic name
+
+3. **Create Kafka Topic** (if using local Kafka):
+   ```bash
+   kafka-topics.sh --create --topic sql-server-raw-errorlogs \
+     --bootstrap-server localhost:29092 --partitions 3 --replication-factor 1
+   ```
+
+4. **Run Simulator**:
+   ```bash
+   # Use default config (Kafka disabled)
+   python simulator.py
+   
+   # Or use example config with Kafka enabled
+   cp config_kafka_example.json config.json
+   python simulator.py
+   ```
+
+### Consumer Example
+```python
+from kafka import KafkaConsumer
+import json
+
+consumer = KafkaConsumer(
+    'sql-server-raw-errorlogs',
+    bootstrap_servers='localhost:29092',
+    value_deserializer=lambda m: json.loads(m.decode('utf-8'))
+)
+
+for message in consumer:
+    log_data = message.value
+    print(f"Server: {log_data['server_name']}")
+    print(f"Error Type: {log_data['error_type']}")
+    print(f"Log Entry: {log_data['log_entry']}")
+    print("---")
+```
+
+### Error Handling
+- Kafka connection failures are logged but don't stop the simulation
+- Failed messages are logged with error details
+- Producer automatically retries failed sends based on configuration
+- Graceful shutdown ensures all pending messages are flushed
 
 ---
 
@@ -202,6 +317,78 @@ This project simulates Microsoft SQL Server error log files to aid in testing an
 ### requirements.txt
 ```
 python-dateutil>=2.8.0
+kafka-python>=2.0.2
+```
+
+### kafka_handler.py (Kafka Publishing)
+```python
+#!/usr/bin/env python3
+"""
+Kafka Handler for SQL Server Error Log Simulator
+Handles publishing log entries to Kafka topics
+"""
+
+import json
+import logging
+from typing import Dict, Any, Optional
+from datetime import datetime
+
+try:
+    from kafka import KafkaProducer
+    from kafka.errors import KafkaError
+    KAFKA_AVAILABLE = True
+except ImportError:
+    KAFKA_AVAILABLE = False
+
+class KafkaLogPublisher:
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.producer = None
+        self.logger = logging.getLogger(__name__)
+        self.enabled = config.get('enabled', False)
+        
+        if not self.enabled:
+            self.logger.info("Kafka publishing is disabled")
+            return
+            
+        if not KAFKA_AVAILABLE:
+            self.logger.error("Kafka library not available")
+            self.enabled = False
+            return
+            
+        self._initialize_producer()
+    
+    def publish_log_entry(self, log_entry: str, server_num: int, 
+                         error_type: str, timestamp: datetime, 
+                         metadata: Optional[Dict[str, Any]] = None):
+        """Publish log entry to Kafka topic"""
+        if not self.enabled or not self.producer:
+            return
+            
+        try:
+            message = {
+                'log_entry': log_entry,
+                'server_num': server_num,
+                'server_name': f"Server{server_num}",
+                'error_type': error_type,
+                'timestamp': timestamp.isoformat(),
+                'metadata': metadata or {}
+            }
+            
+            key = f"server_{server_num}"
+            future = self.producer.send(self.topic, key=key, value=message)
+            future.add_callback(self._on_send_success)
+            future.add_errback(self._on_send_error)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to publish log entry to Kafka: {e}")
+    
+    def close(self):
+        """Close Kafka producer"""
+        if self.producer:
+            self.producer.flush()
+            self.producer.close()
+            self.logger.info("Kafka producer closed")
 ```
 
 ### simulator.py (Main Script)
@@ -226,6 +413,7 @@ from utils import (
     select_weighted_error_type, generate_error_entry,
     setup_logging, create_server_directories
 )
+from kafka_handler import KafkaLogPublisher
 
 class SQLServerLogSimulator:
     def __init__(self, config_path='config.json'):
@@ -239,6 +427,8 @@ class SQLServerLogSimulator:
         
         setup_logging()
         self.logger = logging.getLogger(__name__)
+        
+        self.kafka_publisher = KafkaLogPublisher(self.config)
         
     def start_simulation(self):
         """Start the simulation for all servers"""
@@ -283,6 +473,9 @@ class SQLServerLogSimulator:
                 
                 # Write to log file
                 self._write_log_entry(log_file, log_entry)
+                
+                # Publish to Kafka if enabled
+                self._publish_to_kafka(log_entry, server_num, error_type)
                 
                 # Wait for next entry
                 base_interval = self.config['simulation']['log_interval_seconds']
@@ -487,6 +680,10 @@ nohup python simulator.py &
 - **PowerBI Dashboards**: Create monitoring visualizations
 - **Custom Alerting**: Test notification systems
 - **Automated Analysis**: Train machine learning models
+- **Kafka Streaming**: Real-time log streaming to data pipelines
+- **Apache Spark**: Process logs in real-time analytics workflows
+- **Flink/Storm**: Stream processing and complex event processing
+- **Data Lakes**: Ingestion into data lake architectures
 
 ---
 
@@ -525,6 +722,8 @@ nohup python simulator.py &
 2. **Encoding Issues**: Verify UTF-16 LE support in text editors
 3. **High CPU Usage**: Reduce log frequency or server count
 4. **Disk Space**: Monitor output file sizes
+5. **Kafka Connection Issues**: Verify Kafka broker connectivity and topic existence
+6. **Kafka Dependencies**: Ensure kafka-python is installed: `pip install kafka-python`
 
 ### Debug Mode:
 ```python
@@ -543,5 +742,4 @@ logging.basicConfig(level=logging.DEBUG)
 - **Performance Metrics**: Built-in monitoring and statistics
 
 ---
-PY
-> **Created by**: Sharon Rimer | **Version**: 1.0 | **Last Updated**: August 2025
+> **Created by**: Sharon Rimer | **Version**: 1.2 | **Last Updated**: August 2025
