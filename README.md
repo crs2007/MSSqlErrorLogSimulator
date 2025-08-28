@@ -1,4 +1,4 @@
-# MS SQL Server Error Log Simulator - Project Instructions
+# MS SQL Server Error Log Simulator
 
 ## 📋 Project Overview
 This project simulates Microsoft SQL Server error log files to aid in testing and validating monitoring tools, alerting systems, and log parsers without relying on live SQL Server instances. It creates realistic log entries for multiple servers at configurable intervals, mimicking real SQL Server ERRORLOG files.
@@ -742,4 +742,4 @@ logging.basicConfig(level=logging.DEBUG)
 - **Performance Metrics**: Built-in monitoring and statistics
 
 ---
-> **Created by**: Sharon Rimer | **Version**: 1.2 | **Last Updated**: August 2025
+> **Created by**: Sharon Rimer | **Version**: 1.3 | **Last Updated**: August 2025

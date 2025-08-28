@@ -3,7 +3,7 @@
     "server_count": 3,
     "log_interval_seconds": 25,
     "log_interval_variation": 2,
-    "max_runtime_minutes": 0,
+    "max_runtime_minutes": 1,
     "timezone_offset": "+03:00",
     "per_server": {
       "1": { "log_interval_seconds": 25, "log_interval_variation": 2 },
@@ -106,7 +106,7 @@
     }
   },
   "kafka": {
-    "enabled": true,
+    "enabled": false,
     "bootstrap_servers": "localhost:29092",
     "topic": "sql-server-raw-errorlogs",
     "producer_options": {

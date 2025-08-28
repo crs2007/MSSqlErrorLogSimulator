@@ -21,7 +21,8 @@ from utils import (
     select_weighted_error_type, generate_error_entry,
     setup_logging, create_server_directories
 )
-from kafka_handler import KafkaLogPublisher
+# Conditional import of Kafka handler
+KafkaLogPublisher = None
 
 class SQLServerLogSimulator:
     def __init__(self, config_path='config.json'):
@@ -37,16 +38,33 @@ class SQLServerLogSimulator:
         setup_logging()
         self.logger = logging.getLogger(__name__)
         
-        self.kafka_publisher = KafkaLogPublisher(self.config)
+        # Conditionally initialize Kafka publisher
+        self.kafka_publisher = self._initialize_kafka_publisher()
         
         # Set up signal handler for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
     
+    def _initialize_kafka_publisher(self):
+        """Conditionally initialize Kafka publisher only if enabled"""
+        kafka_config = self.config.get('kafka', {})
+        if not kafka_config.get('enabled', False):
+            self.logger.info("Kafka publishing is disabled - continuing with file-only logging")
+            return None
+        
+        try:
+            from kafka_handler import KafkaLogPublisher
+            return KafkaLogPublisher(self.config)
+        except Exception as e:
+            self.logger.warning(f"Failed to initialize Kafka publisher: {e}")
+            self.logger.info("Continuing with file-only logging")
+            return None
+    
     def _signal_handler(self, signum, frame):
         """Handle shutdown signals"""
         print(f"\nReceived signal {signum}, shutting down gracefully...")
         self.stop_simulation()
+        print("Shutdown complete.")
         sys.exit(0)
 
     def start_simulation(self, runtime_minutes=None):
@@ -71,7 +89,12 @@ class SQLServerLogSimulator:
         max_runtime = runtime_minutes if runtime_minutes is not None else self.config['simulation'].get('max_runtime_minutes', 0)
         if max_runtime > 0:
             self.logger.info(f"Simulation will run for {max_runtime} minutes")
-            threading.Timer(max_runtime * 60, self.stop_simulation).start()
+            def runtime_complete():
+                self.logger.info(f"Runtime of {max_runtime} minutes completed, stopping simulation...")
+                self.stop_simulation()
+            threading.Timer(max_runtime * 60, runtime_complete).start()
+        else:
+            self.logger.info("Simulation will run indefinitely until manually stopped")
     
     def _simulate_server(self, server_num):
         """Simulate log generation for a single server"""
@@ -180,6 +203,10 @@ class SQLServerLogSimulator:
     
     def _publish_to_kafka(self, log_entry, server_num, error_type):
         """Publish log entry to Kafka topic"""
+        # Only attempt to publish if Kafka publisher is available and enabled
+        if self.kafka_publisher is None:
+            return
+            
         try:
             timestamp = datetime.now()
             metadata = {
@@ -196,13 +223,16 @@ class SQLServerLogSimulator:
         self.running = False
         self.stop_event.set()
         
-        # Wait for threads with shorter timeout
+        # Wait for threads with longer timeout to ensure proper cleanup
         for thread in self.threads:
-            thread.join(timeout=1)
+            thread.join(timeout=5)
         
-        # Close Kafka producer
-        if hasattr(self, 'kafka_publisher'):
-            self.kafka_publisher.close()
+        # Close Kafka producer with timeout
+        if hasattr(self, 'kafka_publisher') and self.kafka_publisher is not None:
+            try:
+                self.kafka_publisher.close()
+            except Exception as e:
+                self.logger.warning(f"Error closing Kafka publisher: {e}")
         
         self.logger.info("Simulation stopped")
 
@@ -238,16 +268,25 @@ class SQLServerLogSimulator:
 def main():
     parser = argparse.ArgumentParser(description='MS SQL Server Error Log Simulator')
     parser.add_argument('--runtime', type=int, help='Runtime in minutes (overrides config setting)')
+    parser.add_argument('--config', type=str, default='config.json', help='Configuration file path')
     args = parser.parse_args()
     
-    simulator = SQLServerLogSimulator()
+    simulator = SQLServerLogSimulator(args.config)
     
     simulator.start_simulation(runtime_minutes=args.runtime)
     print("SQL Server Log Simulator started. Press Ctrl+C to stop...")
     
     try:
-        while simulator.running:
+        # Wait for simulation to complete or be interrupted
+        while simulator.running and not simulator.stop_event.is_set():
             time.sleep(0.5)
+        
+        # Ensure proper cleanup when runtime completes
+        if not simulator.running:
+            simulator.stop_simulation()
+        
+        print("Simulation completed.")
+            
     except KeyboardInterrupt:
         pass  # Signal handler will take care of shutdown
 
